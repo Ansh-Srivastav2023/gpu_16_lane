@@ -62,14 +62,20 @@ def imm_arith_func(keywords, opcode):
 
 
 def ld_ops_func(keywords, opcode):
-    rd      = keywords[1]
-    rs1     = keywords[2]
+
     func    = ld_ops[keywords[0]]
-    reg_check([rd, rs1])
-    if keywords[0] in ['mov', 'MOV']:
-        imm = 0
+    imm     = 0
+    if keywords[0] in ['li', 'LI']:
+        rd  = keywords[1]
+        imm = int(keywords[2])
+        rs1 = 'rx0'
+    elif keywords[0] in ['mov', 'MOV']:
+        rd  = keywords[1]
+        rs1 = keywords[2]
     else:
         imm = int(keywords[3]) & 0xFFF
+        
+    reg_check([rd, rs1])
     imm_hi  = (imm >> 8) & 0x1F
     imm_lo  = imm & 0xFF
     code    = opcode << 27 | registers[rd] << 22 | registers[rs1] << 17 | imm_hi << 12 | func << 8 | imm_lo
@@ -323,7 +329,7 @@ with open('program.asm', 'r') as file:
             hexcodes.append(encode_type_sel(keywords))
 
 
-with open(os.path.join(os.path.dirname(os.getcwd()), 'hex/gpu_imem.hex'), 'w') as ifile:
+with open(os.path.join(os.path.dirname(os.getcwd()), 'hex/imem.mem'), 'w') as ifile:
     for i in hexcodes:
         ifile.write(f"{i}\n")
         
